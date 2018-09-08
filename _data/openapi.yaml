@@ -1,0 +1,336 @@
+swagger: '2.0'
+info:
+  title: "Public Companies"
+  description: "This is an API for access companies listed by the SEC which have a CIK and industry classification."
+  termsOfService: "https://example.com/tos/"
+  contact:
+    name: API Evangelist
+    url: https://apievangelist.com
+    email: info@apievangelist.com
+  license:
+    name: Open Data Commons Public Domain
+    url: http://opendatacommons.org/licenses/pddl/
+  version: v1.2
+host: ql1rvofpu5.execute-api.us-east-1.amazonaws.com
+basePath: /production
+schemes:
+- http
+produces:
+- application/json
+paths:
+  /companies/:
+    get:
+      summary: Search Companies
+      description: Search across all of the companies.
+      operationId: searchCompanies
+      parameters:
+        - in: query
+          required: true
+          type: string
+          name: search_name
+          description: 'The string to search company name by.'
+        - in: query
+          required: true
+          type: string
+          name: search_sic
+          description: 'The string to search SIC code by.'
+        - in: query
+          required: true
+          type: string
+          name: search_state
+          description: 'The string to search state of incorporation by.'
+      security:
+        - api-key: []
+      responses:
+        '200':
+          description: Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/companies"
+        '500':
+          description: Error Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+      tags:
+      - Companies
+    post:
+      summary: Add Company
+      description: Add a new company to the database.
+      operationId: companiesOperation
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/companies'
+      security:
+        - api-key: []
+      responses:
+        '200':
+          description: Success Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/companies"
+        '403':
+          description: No Access Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+        '500':
+          description: Error Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+      tags:
+      - Companies
+  /companies/{cik}/:
+    get:
+      summary: Get Company
+      description: Get a single company record.
+      operationId: getCompany
+      parameters:
+        - in: path
+          required: true
+          type: string
+          name: cik
+          description: 'The CIK for the company.'
+      security:
+        - api-key: []
+      responses:
+        '200':
+          description: Area Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/companies"
+        '500':
+          description: Error Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+      tags:
+      - Companies
+    put:
+      summary: Update Company
+      description: Update the company record.
+      operationId: updateCompany
+      parameters:
+        - in: path
+          required: true
+          type: string
+          name: cik
+          description: 'The CIK for the company.'
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/companies'
+      security:
+        - api-key: []
+      responses:
+        '200':
+          description: Success Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/companies"
+        '403':
+          description: No Access Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+        '500':
+          description: Error Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+      tags:
+      - Companies
+    delete:
+      summary: Delete Company
+      description: Delete a single company.
+      operationId: deleteCompany
+      parameters:
+        - in: path
+          required: true
+          type: string
+          name: cik
+          description: 'The CIK for the company.'
+      security:
+        - api-key: []
+      responses:
+        '200':
+          description: Success Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/company"
+        '403':
+          description: No Access Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+        '500':
+          description: Error Response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/errorResponse"
+      tags:
+      - Companies
+securityDefinitions:
+  api-key:
+    type: apiKey
+    in: header
+    name: x-api-key
+definitions:
+  companies:
+    title: companies
+    description: All the companies with a CIK and industry code.
+    type: array
+    items:
+      $ref: "#/definitions/company"
+  company:
+    title: companies
+    description: All the companies with a CIK and industry code.
+    type: object
+    properties:
+      cik:
+        type: string
+        maxLength: 100
+        description: The CIK for the company.
+      name:
+        type: string
+        maxLength: 500
+        description: The name of the company.
+      location:
+        type: string
+        maxLength: 5
+        description: The location for the company.
+      sic:
+        type: integer
+        maxLength: 11
+        description: The Standard Industrial Classification (SIC) code for the company.
+      sic_description:
+        type: string
+        maxLength: 250
+        description: The Standard Industrial Classification (SIC) code description for the company.
+      fiscal_year_end:
+        type: string
+        maxLength: 50
+        description: When the company's fiscal year ends.
+      state_of_incorporation:
+        type: string
+        maxLength: 5
+        description: State the compay was incorporated.
+      business_addresses:
+        type: "array"
+        description: The physical addresses for the business.
+        items:
+          $ref: "#/definitions/business_address"
+      mailing_addresses:
+        type: "array"
+        description: The mailing addresses for the business.
+        items:
+          $ref: "#/definitions/mailing_address"
+      former_names:
+        type: "array"
+        description: The former names used by the business. 
+        items:
+          $ref: "#/definitions/former_name"
+    required:
+    - cik
+  business_address:
+    title: Business Address
+    description: The business address for a company.
+    type: object
+    properties:
+      cik:
+        type: integer
+        maxLength: 11
+        description: The CIK for the company.
+      street:
+        type: string
+        maxLength: 500
+        description: The street address for the business.
+      city:
+        type: string
+        maxLength: 250
+        description: The city the company resides.
+      state:
+        type: string
+        maxLength: 10
+        description: The state the company resides.
+      zip_code:
+        type: string
+        maxLength: 25
+        description: The zip code where the company resides.
+      phone_number:
+        type: string
+        maxLength: 10
+        description: The phone umber for the company.
+    required:
+    - cik
+  former_name:
+    title: Former Names
+    description: Former names for the company.
+    type: object
+    properties:
+      cik:
+        type: integer
+        maxLength: 11
+        description: The CIK for the company.
+      date_used:
+        type: string
+        maxLength: 50
+        description: Last date company used name.
+      name:
+        type: string
+        maxLength: 250
+        description: The name the business used.
+    required:
+    - cik
+  mailing_address:
+    title: Mailing Address
+    description: The mailing address for a company.
+    type: object
+    properties:
+      cik:
+        type: integer
+        maxLength: 11
+        description: The CIK for the company.
+      street:
+        type: string
+        maxLength: 500
+        description: The street address for the business mailing address.
+      city:
+        type: string
+        maxLength: 250
+        description: The city the company receives mail.
+      state:
+        type: string
+        maxLength: 10
+        description: The state the company receives mail.
+      zip_code:
+        type: string
+        maxLength: 25
+        description: The zip code where the company receives mail.
+    required:
+    - cik
+  errorResponse:
+    description: 'Describes an HTTP error returned'
+    properties:
+      code:
+        description: 'Repeat the HTTP status code'
+        type: integer
+      message:
+        description: 'A plain language message explaining the error'
+        type: integer
